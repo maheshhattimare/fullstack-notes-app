@@ -1,8 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
-import connetDB from "./config/db.js";
 dotenv.config();
 import cors from "cors";
+
+import connetDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import notesRoutes from "./routes/noteRoutes.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -16,10 +19,8 @@ app.use(cors());
 connetDB();
 
 // routes
-app.get("/", (req, res) => {
-  console.log("Done");
-  res.send("hello");
-});
+app.use("/api/users", authRoutes);
+app.use("/api/notes", notesRoutes);
 
 // run server
 app.listen(PORT, () => {
