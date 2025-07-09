@@ -86,19 +86,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen px-4 py-6 max-w-4xl mx-auto">
-      {/* Navbar */}
-      <nav className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-2">
-          <img className="w-7 h-7" src="/logo.png" alt="Logo" />
-          <p className="text-xl font-semibold">Dashboard</p>
-        </div>
-        <button
-          onClick={handleSignout}
-          className="text-blue-600 font-semibold hover:underline"
-        >
-          Sign Out
-        </button>
-      </nav>
       <Navbar handleSignout={handleSignout} />
 
       {/* User Info */}
@@ -109,7 +96,7 @@ const Dashboard = () => {
         <p className="text-gray-600">{user?.email}</p>
       </div>
 
-      {/* Create Note Button */}
+      {/*Note Button */}
       <div className="mb-6 text-center sm:text-left">
         <button
           onClick={() => {

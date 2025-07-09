@@ -2,16 +2,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 import { useState } from "react";
 import API from "../services/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Signin = () => {
   const navigate = useNavigate();
+
   const [isShowPassword, setIsShowPassword] = useState(false);
   const toggleShowPassword = () => setIsShowPassword((prev) => !prev);
 
   const [sendingOtp, setSendingOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const [otpError, setOtpError] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [otpError, setOtpError] = useState("");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -25,24 +27,25 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setOtpError(false);
+    setOtpError("");
 
     if (!otpSent) {
-      // First step: send OTP
       try {
         setSendingOtp(true);
-        const res = await API.post("/users/login", {
+        await API.post("/users/login", {
           email: formData.email,
         });
         setOtpSent(true);
       } catch (err) {
         console.error("OTP request failed", err);
-        setOtpError(true);
+        const msg =
+          err?.response?.data?.message ||
+          "Failed to send OTP. Please try again.";
+        setOtpError(msg);
       } finally {
         setSendingOtp(false);
       }
     } else {
-      // Second step: verify OTP
       try {
         setVerifying(true);
         const res = await API.post("/users/verify-otp", {
@@ -53,7 +56,9 @@ const Signin = () => {
         navigate("/");
       } catch (err) {
         console.error("OTP verification failed", err);
-        setOtpError(true);
+        const msg =
+          err?.response?.data?.message || "Invalid OTP. Please try again.";
+        setOtpError(msg);
       } finally {
         setVerifying(false);
       }
@@ -64,7 +69,6 @@ const Signin = () => {
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Section */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-[150px]">
-        {/* Logo */}
         <div className="lg:absolute top-6 left-8 flex items-center gap-1 font-semibold mb-6 justify-center lg:justify-start">
           <img src="/logo.png" alt="Logo" className="w-7" />
           <p className="text-2xl">HD</p>
@@ -96,7 +100,7 @@ const Signin = () => {
             />
           </div>
 
-          {/* OTP */}
+          {/* OTP Input */}
           {otpSent && (
             <div className="w-full relative">
               <input
@@ -107,7 +111,7 @@ const Signin = () => {
                 onChange={handleChange}
                 placeholder="Enter OTP"
                 required
-                className="w-full border border-gray-300 rounded-lg px-4 py-3  text-black focus:outline-none focus:border-blue-600"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-black focus:outline-none focus:border-blue-600"
               />
               {isShowPassword ? (
                 <FaRegEye
@@ -138,7 +142,7 @@ const Signin = () => {
           {/* Error Message */}
           {otpError && (
             <div className="text-sm text-red-700 bg-red-100 border border-red-300 px-4 py-2 rounded-md">
-              OTP failed. Please try again.
+              {otpError}
             </div>
           )}
 
@@ -159,6 +163,27 @@ const Signin = () => {
               : "Get OTP"}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="my-4 text-center text-sm text-gray-400">or</div>
+
+        {/* Google Login Button */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={async (response) => {
+              try {
+                const res = await API.post("/users/google-login", {
+                  credential: response.credential,
+                });
+                localStorage.setItem("token", res.data.token);
+                window.location.href = "/dashboard";
+              } catch (err) {
+                alert("Google login failed");
+              }
+            }}
+            onError={() => alert("Google login failed")}
+          />
+        </div>
 
         <p className="mt-5 text-gray-500 text-center">
           Need an account?{" "}

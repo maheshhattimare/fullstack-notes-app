@@ -14,7 +14,7 @@ export const createNote = async (req, res) => {
     const newNote = new Note({
       title,
       content,
-      userId: req.user.id, // comes from JWT middleware
+      userId: req.user.id, //from JWT middleware
     });
 
     await newNote.save();
@@ -30,7 +30,7 @@ export const createNote = async (req, res) => {
   }
 };
 
-// Get all notes for a user
+// Get all notes
 export const getNotes = async (req, res) => {
   try {
     const notes = await Note.find({ userId: req.user.id }).sort({

@@ -3,6 +3,8 @@ import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 import { useState } from "react";
 import API from "../services/api";
 
+import { GoogleLogin } from "@react-oauth/google";
+
 const Signup = () => {
   const navigate = useNavigate();
 
@@ -204,6 +206,28 @@ const Signup = () => {
               : "Get OTP"}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="my-4 text-center text-sm text-gray-400">or</div>
+
+        {/* Google Login Button */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={async (response) => {
+              try {
+                const res = await API.post("/users/google-login", {
+                  credential: response.credential,
+                });
+
+                localStorage.setItem("token", res.data.token);
+                window.location.href = "/";
+              } catch (err) {
+                alert("Google login failed");
+              }
+            }}
+            onError={() => alert("Google login failed")}
+          />
+        </div>
 
         <p className="mt-5 text-gray-500 text-center">
           Already have an account?{" "}

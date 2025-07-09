@@ -1,18 +1,18 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 const authMiddleware = (req, res, next) => {
   try {
     // Get the token from headers
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: 'Unauthorized: No token provided',
+        message: "Unauthorized: No token provided",
       });
     }
 
-    const token = authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
+    const token = authHeader.split(" ")[1];
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -23,12 +23,12 @@ const authMiddleware = (req, res, next) => {
       email: decoded.email,
     };
 
-    next(); // pass control to next handler
+    next();
   } catch (error) {
-    console.error('JWT verification failed:', error);
+    console.error("JWT verification failed:", error);
     return res.status(401).json({
       success: false,
-      message: 'Unauthorized: Invalid or expired token',
+      message: "Unauthorized: Invalid or expired token",
     });
   }
 };

@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     dob: {
-      type: String, // e.g., "12 December 1999"
+      type: String,
       required: true,
     },
     email: {
@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema(
       expiresAt: {
         type: Date,
       },
+    },
+    googleId: {
+      type: String,
+      default: null,
     },
     isVerified: {
       type: Boolean,

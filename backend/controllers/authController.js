@@ -1,7 +1,10 @@
 import UserModel from "../models/User.js";
 import jwt from "jsonwebtoken";
 import { generateOtp } from "../utils/generateOTP.js";
-import { sendOtpEmail } from "../utils/sendEmail.js"; // if you're sending OTP
+import { sendOtpEmail } from "../utils/sendEmail.js";
+
+import { OAuth2Client } from "google-auth-library";
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const signup = async (req, res) => {
   const { fullName, dob, email } = req.body;
@@ -33,7 +36,7 @@ export const signup = async (req, res) => {
       { upsert: true }
     );
 
-    // Optional: send email with OTP
+    // send email with OTP
     await sendOtpEmail(email, otpCode);
 
     return res.status(200).json({
@@ -134,14 +137,14 @@ export const verifyOtp = async (req, res) => {
 
     // 5. OTP is valid → update user
     user.isVerified = true;
-    user.otp = {}; // clear OTP
+    user.otp = {};
     await user.save();
 
     // 6. Generate JWT token
     const token = jwt.sign(
       { userId: user._id, fullName: user.fullName, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "30d" }
+      { expiresIn: "7d" }
     );
 
     // 7. Return success with token
@@ -160,6 +163,90 @@ export const verifyOtp = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+};
+
+// google auth
+export const googleLogin = async (req, res) => {
+  const { credential } = req.body;
+
+  try {
+    // 1. Verify the token from Google
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, sub } = payload;
+
+    if (!email || !name || !sub) {
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete Google credentials",
+      });
+    }
+
+    // 2. Try to find user
+    let user = await UserModel.findOne({ email });
+
+    if (!user) {
+      user = await UserModel.create({
+        fullName: name,
+        email,
+        dob: "01 January 1990",
+        googleId: sub,
+        isVerified: true,
+        // Clear any existing OTP data
+        otp: {
+          code: undefined,
+          expiresAt: undefined,
+        },
+      });
+    } else {
+      if (!user.googleId) {
+        user.googleId = sub;
+        user.isVerified = true;
+
+        user.otp = {
+          code: undefined,
+          expiresAt: undefined,
+        };
+        await user.save();
+      }
+    }
+
+    // 3. Create JWT
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        fullName: user.fullName,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Google auth successful",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        dob: user.dob,
+        isVerified: user.isVerified,
+        hasGoogleAuth: !!user.googleId,
+      },
+    });
+  } catch (error) {
+    console.error("Google login error:", error.message);
+    return res.status(401).json({
+      success: false,
+      message: "Google login failed",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
