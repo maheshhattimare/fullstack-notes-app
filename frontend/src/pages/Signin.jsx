@@ -176,7 +176,7 @@ const Signin = () => {
                   credential: response.credential,
                 });
                 localStorage.setItem("token", res.data.token);
-                window.location.href = "/dashboard";
+                window.location.href = "/";
               } catch (err) {
                 alert("Google login failed");
               }
