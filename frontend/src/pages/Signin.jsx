@@ -1,13 +1,64 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 import { useState } from "react";
+import API from "../services/api";
 
 const Signin = () => {
+  const navigate = useNavigate();
   const [isShowPassword, setIsShowPassword] = useState(false);
   const toggleShowPassword = () => setIsShowPassword((prev) => !prev);
 
+  const [sendingOtp, setSendingOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpError, setOtpError] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+
+  const [formData, setFormData] = useState({
+    email: "",
+    otp: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setOtpError(false);
+
+    if (!otpSent) {
+      // First step: send OTP
+      try {
+        setSendingOtp(true);
+        const res = await API.post("/users/login", {
+          email: formData.email,
+        });
+        setOtpSent(true);
+      } catch (err) {
+        console.error("OTP request failed", err);
+        setOtpError(true);
+      } finally {
+        setSendingOtp(false);
+      }
+    } else {
+      // Second step: verify OTP
+      try {
+        setVerifying(true);
+        const res = await API.post("/users/verify-otp", {
+          email: formData.email,
+          otp: formData.otp,
+        });
+        localStorage.setItem("token", res.data.token);
+        navigate("/");
+      } catch (err) {
+        console.error("OTP verification failed", err);
+        setOtpError(true);
+      } finally {
+        setVerifying(false);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -24,7 +75,7 @@ const Signin = () => {
           Please login to continue to your account.
         </p>
 
-        <form className="flex flex-col gap-6">
+        <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
           {/* Email */}
           <div className="relative w-full">
             <label
@@ -37,74 +88,75 @@ const Signin = () => {
               type="email"
               id="email"
               name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              disabled={otpSent}
               className="w-full border border-gray-300 rounded-lg px-4 pt-4 pb-2 text-black focus:outline-none focus:border-blue-600"
             />
           </div>
 
           {/* OTP */}
-          <div className="w-full relative">
-            <input
-              type={isShowPassword ? "text" : "password"}
-              id="otp"
-              name="otp"
-              placeholder="OTP"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3  text-black focus:outline-none focus:border-blue-600"
-            />
-            {isShowPassword ? (
-              <FaRegEye
-                onClick={toggleShowPassword}
-                size={22}
-                className="text-gray-500 absolute top-3 right-4 cursor-pointer"
-              />
-            ) : (
-              <FaRegEyeSlash
-                onClick={toggleShowPassword}
-                size={22}
-                className="text-gray-500 absolute top-3 right-4 cursor-pointer"
-              />
-            )}
-          </div>
-
-          <div className="-mt-4">
-            <button
-              type="button"
-              className="text-start text-blue-700 underline mb-4"
-            >
-              resend otp
-            </button>
-
-            <div className="flex items-center text-sm">
+          {otpSent && (
+            <div className="w-full relative">
               <input
-                type="checkbox"
-                id="terms"
+                type={isShowPassword ? "text" : "password"}
+                id="otp"
+                name="otp"
+                value={formData.otp}
+                onChange={handleChange}
+                placeholder="Enter OTP"
                 required
-                className="w-4 h-4 mr-2 text-blue-600 rounded focus:ring-0"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3  text-black focus:outline-none focus:border-blue-600"
               />
-              <label htmlFor="terms" className="text-gray-600">
-                Keep me logged in
-              </label>
+              {isShowPassword ? (
+                <FaRegEye
+                  onClick={toggleShowPassword}
+                  size={22}
+                  className="text-gray-500 absolute top-3 right-4 cursor-pointer"
+                />
+              ) : (
+                <FaRegEyeSlash
+                  onClick={toggleShowPassword}
+                  size={22}
+                  className="text-gray-500 absolute top-3 right-4 cursor-pointer"
+                />
+              )}
             </div>
-          </div>
+          )}
+
+          {/* Success Message */}
           {otpSent && (
             <div className="text-sm text-green-700 bg-green-100 border border-green-300 px-4 py-2 rounded-md space-y-1">
               <p>✅ OTP has been sent to your email.</p>
               <p className="text-xs text-gray-600">
-                This OTP will expire in 5 minutes.
+                This OTP will expire in 10 minutes.
               </p>
             </div>
           )}
 
+          {/* Error Message */}
           {otpError && (
             <div className="text-sm text-red-700 bg-red-100 border border-red-300 px-4 py-2 rounded-md">
-              OTP does not match. Please try again.
+              OTP failed. Please try again.
             </div>
           )}
 
+          {/* Button */}
           <button
             type="submit"
-            className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            disabled={
+              sendingOtp || verifying || (otpSent && formData.otp.length < 6)
+            }
           >
-            Get OTP
+            {sendingOtp
+              ? "Sending OTP..."
+              : verifying
+              ? "Verifying..."
+              : otpSent
+              ? "Sign In"
+              : "Get OTP"}
           </button>
         </form>
 

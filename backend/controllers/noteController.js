@@ -2,16 +2,17 @@ import Note from "../models/Note.js";
 
 // Create a new note
 export const createNote = async (req, res) => {
-  const { content } = req.body;
+  const { title, content } = req.body;
 
-  if (!content) {
+  if (!title || !content) {
     return res
       .status(400)
-      .json({ success: false, message: "Note is required" });
+      .json({ success: false, message: "All fields are required." });
   }
 
   try {
     const newNote = new Note({
+      title,
       content,
       userId: req.user.id, // comes from JWT middleware
     });

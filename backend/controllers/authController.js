@@ -14,7 +14,7 @@ export const signup = async (req, res) => {
     }
 
     const otpCode = generateOtp();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     await UserModel.updateOne(
       { email },
@@ -139,9 +139,9 @@ export const verifyOtp = async (req, res) => {
 
     // 6. Generate JWT token
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, fullName: user.fullName, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "30d" }
     );
 
     // 7. Return success with token
