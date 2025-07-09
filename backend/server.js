@@ -22,6 +22,11 @@ connetDB();
 app.use("/api/users", authRoutes);
 app.use("/api/notes", notesRoutes);
 
+// to solve render shutdown problem
+app.get("/api/ping", (req, res) => {
+  res.status(200).send("pong");
+});
+
 // run server
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
