@@ -48,8 +48,8 @@ project-root/
 ### 1. Clone and open in editor
 
 ```bash
-git clone https://github.com/your-username/notes-app.git
-cd notes-app
+git clone https://github.com/maheshhattimare/fullstack-notes-app
+cd fullstack-notes-app
 ```
 
 ### 2. Navigate to backend
