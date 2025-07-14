@@ -1,10 +1,10 @@
-# 📝 Notes App - Full Stack Authentication Project
+# 📝 NoteEase - Full Stack Authentication Project
 
 A production-ready, full-stack Note Taking Web App with modern authentication features using OTP & Google OAuth. Built using **MERN stack (MongoDB, Express, React, Node.js)**.
 
 ## Visit the Website
 
-## [Notes App](fullstack-notes-app-frontend-ten.vercel.app/)
+## [NoteEase](fullstack-notes-app-frontend-ten.vercel.app/)
 
 ## 🚀 Features
 

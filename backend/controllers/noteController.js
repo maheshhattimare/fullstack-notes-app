@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Note from "../models/Note.js";
 
 // Create a new note
@@ -14,7 +15,7 @@ export const createNote = async (req, res) => {
     const newNote = new Note({
       title,
       content,
-      userId: req.user.id, //from JWT middleware
+      userId: req.user.id,
     });
 
     await newNote.save();
@@ -43,12 +44,61 @@ export const getNotes = async (req, res) => {
   }
 };
 
-// Delete a note by ID
-export const deleteNote = async (req, res) => {
-  const noteId = req.params.id;
+// Get single note
+export const getNoteById = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid note ID" });
+  }
 
   try {
-    const note = await Note.findOne({ _id: noteId, userId: req.user.id });
+    const note = await Note.findOne({ _id: id, userId: req.user.id });
+
+    if (!note) {
+      return res.status(404).json({ success: false, message: "Note not found" });
+    }
+
+    return res.status(200).json({ success: true, note });
+  } catch (error) {
+    console.error("Get note by ID error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Update note
+export const updateNote = async (req, res) => {
+  const { id } = req.params;
+  const { title, content } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid note ID" });
+  }
+
+  try {
+    const note = await Note.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      { title, content },
+      { new: true }
+    );
+
+    if (!note) {
+      return res.status(404).json({ success: false, message: "Note not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Note updated", note });
+  } catch (error) {
+    console.error("Update note error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Delete a note
+export const deleteNote = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const note = await Note.findOne({ _id: id, userId: req.user.id });
 
     if (!note) {
       return res
@@ -56,7 +106,7 @@ export const deleteNote = async (req, res) => {
         .json({ success: false, message: "Note not found" });
     }
 
-    await Note.deleteOne({ _id: noteId });
+    await Note.deleteOne({ _id: id });
 
     return res
       .status(200)

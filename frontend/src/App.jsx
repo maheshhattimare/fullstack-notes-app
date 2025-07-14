@@ -6,13 +6,20 @@ import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
-  console.log("Google Client ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
-
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <Routes>
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <LandingPage />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/signup"
           element={
@@ -30,7 +37,7 @@ function App() {
           }
         />
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <PrivateRoute>
               <Dashboard />
