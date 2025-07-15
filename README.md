@@ -4,7 +4,7 @@ A production-ready, full-stack Note Taking Web App with modern authentication fe
 
 ## Visit the Website
 
-## [NoteEase](fullstack-notes-app-frontend-ten.vercel.app/)
+## [NoteEase](https://note-easee.vercel.app/)
 
 ## 🚀 Features
 
