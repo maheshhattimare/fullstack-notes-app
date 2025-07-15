@@ -28,6 +28,8 @@ const Signup = () => {
   const [otpError, setOtpError] = useState("");
   const [formErrors, setFormErrors] = useState({});
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     fullName: "",
     dob: "",
@@ -119,6 +121,7 @@ const Signup = () => {
   };
 
   const handleGoogleSuccess = async (response) => {
+    setGoogleLoading(true);
     try {
       const res = await API.post("/users/google-login", {
         credential: response.credential,
@@ -127,6 +130,8 @@ const Signup = () => {
       navigate("/dashboard");
     } catch (err) {
       setOtpError("Google signup failed. Please try again.");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -367,15 +372,19 @@ const Signup = () => {
           {/* Google Login */}
           <div className="flex justify-center">
             <div className="transform hover:scale-105 transition-transform duration-200">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() =>
-                  setOtpError("Google signup failed. Please try again.")
-                }
-                theme="outline"
-                size="large"
-                width="100%"
-              />
+              {googleLoading ? (
+                <Loading />
+              ) : (
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() =>
+                    setOtpError("Google signup failed. Please try again.")
+                  }
+                  theme="outline"
+                  size="large"
+                  width="100%"
+                />
+              )}
             </div>
           </div>
 

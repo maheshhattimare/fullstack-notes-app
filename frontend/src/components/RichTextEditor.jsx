@@ -200,7 +200,7 @@ const RichTextEditor = ({ value, onChange, placeholder, error }) => {
       />
 
       {/* Placeholder styling */}
-      <style jsx>{`
+      <style>{`
         [contenteditable]:empty:before {
           content: attr(data-placeholder);
           color: #94a3b8;

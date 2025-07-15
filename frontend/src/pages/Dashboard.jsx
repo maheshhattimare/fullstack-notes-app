@@ -214,7 +214,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar handleSignout={handleSignout} user={user} />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 pt-1 pb-8">
         {/* Hero Section */}
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 mb-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-full -translate-y-8 translate-x-8"></div>
@@ -397,15 +397,19 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                {/* <div className="bg-slate-50 rounded-xl p-4 mb-6">
                   <h4 className="font-semibold text-slate-800 mb-2 line-clamp-1">
                     "{deleteConfirm.title}"
                   </h4>
-                  <div
-                    className="text-slate-700 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: viewNote.content }}
-                  />
-                </div>
+                  {deleteConfirm?.content && (
+                    <div
+                      className="text-slate-700 leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: deleteConfirm.content,
+                      }}
+                    />
+                  )}
+                </div> */}
 
                 <p className="text-slate-600 mb-6">
                   Are you sure you want to delete this note? This action cannot

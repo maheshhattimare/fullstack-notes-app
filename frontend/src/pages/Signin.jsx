@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import API from "../services/api";
 import { GoogleLogin } from "@react-oauth/google";
+import Loading from "../components/Loading";
 
 const Signin = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const Signin = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [otpError, setOtpError] = useState("");
+
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -77,6 +80,7 @@ const Signin = () => {
 
   const handleGoogleSuccess = async (response) => {
     try {
+      setGoogleLoading(true);
       const res = await API.post("/users/google-login", {
         credential: response.credential,
       });
@@ -84,6 +88,8 @@ const Signin = () => {
       navigate("/dashboard");
     } catch (err) {
       setOtpError("Google login failed. Please try again.");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -259,15 +265,19 @@ const Signin = () => {
           {/* Google Login */}
           <div className="flex justify-center">
             <div className="transform hover:scale-105 transition-transform duration-200">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() =>
-                  setOtpError("Google login failed. Please try again.")
-                }
-                theme="outline"
-                size="large"
-                width="100%"
-              />
+              {googleLoading ? (
+                <Loading />
+              ) : (
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() =>
+                    setOtpError("Google login failed. Please try again.")
+                  }
+                  theme="outline"
+                  size="large"
+                  width="100%"
+                />
+              )}
             </div>
           </div>
 
