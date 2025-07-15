@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 import API from "../services/api";
 import { GoogleLogin } from "@react-oauth/google";
+import Loading from "../components/Loading";
 
 const Signup = () => {
   const navigate = useNavigate();
