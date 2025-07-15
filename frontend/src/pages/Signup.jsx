@@ -1,5 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Shield, User, Calendar, CheckCircle, AlertCircle, Loader2, BookOpen, UserPlus } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Shield,
+  User,
+  Calendar,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  BookOpen,
+  UserPlus,
+} from "lucide-react";
 import { useState } from "react";
 import API from "../services/api";
 import { GoogleLogin } from "@react-oauth/google";
@@ -28,19 +40,19 @@ const Signup = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (otpError) setOtpError(""); // Clear error when user starts typing
     if (formErrors[name]) {
-      setFormErrors(prev => ({ ...prev, [name]: "" }));
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!formData.fullName.trim()) {
       errors.fullName = "Full name is required";
     } else if (formData.fullName.trim().length < 2) {
       errors.fullName = "Full name must be at least 2 characters";
     }
-    
+
     if (!formData.dob) {
       errors.dob = "Date of birth is required";
     } else {
@@ -51,13 +63,13 @@ const Signup = () => {
         errors.dob = "You must be at least 13 years old";
       }
     }
-    
+
     if (!formData.email.trim()) {
       errors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = "Please enter a valid email address";
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -68,7 +80,7 @@ const Signup = () => {
 
     if (!otpSent) {
       if (!validateForm()) return;
-      
+
       try {
         setSendingOtp(true);
         await API.post("/users/signup", {
@@ -79,7 +91,9 @@ const Signup = () => {
         setOtpSent(true);
       } catch (err) {
         console.error("OTP request failed", err);
-        const msg = err?.response?.data?.message || "Failed to send OTP. Please try again.";
+        const msg =
+          err?.response?.data?.message ||
+          "Failed to send OTP. Please try again.";
         setOtpError(msg);
       } finally {
         setSendingOtp(false);
@@ -95,7 +109,8 @@ const Signup = () => {
         navigate("/dashboard");
       } catch (err) {
         console.error("OTP verification failed", err);
-        const msg = err?.response?.data?.message || "Invalid OTP. Please try again.";
+        const msg =
+          err?.response?.data?.message || "Invalid OTP. Please try again.";
         setOtpError(msg);
       } finally {
         setVerifying(false);
@@ -122,21 +137,23 @@ const Signup = () => {
         {/* Background Elements */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-full blur-xl"></div>
         <div className="absolute bottom-20 right-10 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-emerald-500/10 rounded-full blur-xl"></div>
-        
+
         {/* Logo */}
-        <div className="lg:absolute top-8 left-8 flex items-center gap-3 mb-8 lg:mb-0 justify-center lg:justify-start">
-          <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-              <BookOpen className="w-5 h-5 text-white" />
+        <a href="/">
+          <div className="lg:absolute top-8 left-8 flex items-center gap-3 mb-8 lg:mb-0 justify-center lg:justify-start">
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
             </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                NoteEase
+              </h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              NoteEase
-            </h1>
-          </div>
-        </div>
+        </a>
 
         {/* Main Content */}
         <div className="relative z-10 max-w-md mx-auto lg:mx-0 w-full">
@@ -145,7 +162,8 @@ const Signup = () => {
               Join NoteEase
             </h2>
             <p className="text-slate-600 text-lg leading-relaxed">
-              Create your account and start organizing your thoughts with our powerful note-taking platform.
+              Create your account and start organizing your thoughts with our
+              powerful note-taking platform.
             </p>
           </div>
 
@@ -167,7 +185,7 @@ const Signup = () => {
                   disabled={otpSent}
                   placeholder="Enter your full name"
                   className={`w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border ${
-                    formErrors.fullName ? 'border-red-500' : 'border-slate-200'
+                    formErrors.fullName ? "border-red-500" : "border-slate-200"
                   } rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all duration-200 disabled:bg-slate-50 disabled:text-slate-500`}
                 />
               </div>
@@ -195,7 +213,7 @@ const Signup = () => {
                   required
                   disabled={otpSent}
                   className={`w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border ${
-                    formErrors.dob ? 'border-red-500' : 'border-slate-200'
+                    formErrors.dob ? "border-red-500" : "border-slate-200"
                   } rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all duration-200 disabled:bg-slate-50 disabled:text-slate-500`}
                 />
               </div>
@@ -224,7 +242,7 @@ const Signup = () => {
                   disabled={otpSent}
                   placeholder="Enter your email address"
                   className={`w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border ${
-                    formErrors.email ? 'border-red-500' : 'border-slate-200'
+                    formErrors.email ? "border-red-500" : "border-slate-200"
                   } rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all duration-200 disabled:bg-slate-50 disabled:text-slate-500`}
                 />
               </div>
@@ -277,9 +295,12 @@ const Signup = () => {
                   <div className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-emerald-800 font-medium">OTP sent successfully!</p>
+                      <p className="text-emerald-800 font-medium">
+                        OTP sent successfully!
+                      </p>
                       <p className="text-emerald-600 text-sm mt-1">
-                        Check your email for the 6-digit verification code. It expires in 10 minutes.
+                        Check your email for the 6-digit verification code. It
+                        expires in 10 minutes.
                       </p>
                     </div>
                   </div>
@@ -348,7 +369,9 @@ const Signup = () => {
             <div className="transform hover:scale-105 transition-transform duration-200">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
-                onError={() => setOtpError("Google signup failed. Please try again.")}
+                onError={() =>
+                  setOtpError("Google signup failed. Please try again.")
+                }
                 theme="outline"
                 size="large"
                 width="100%"
@@ -360,8 +383,8 @@ const Signup = () => {
           <div className="mt-8 text-center">
             <p className="text-slate-600">
               Already have an account?{" "}
-              <Link 
-                to="/signin" 
+              <Link
+                to="/signin"
                 className="font-semibold text-purple-600 hover:text-purple-700 transition-colors hover:underline"
               >
                 Sign in
@@ -380,7 +403,7 @@ const Signup = () => {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-emerald-500/20"></div>
-          
+
           {/* Floating Elements */}
           <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl max-w-sm">
             <div className="flex items-center gap-3 mb-3">
@@ -390,7 +413,8 @@ const Signup = () => {
               <h3 className="font-semibold text-slate-800">Join Thousands</h3>
             </div>
             <p className="text-slate-600 text-sm leading-relaxed">
-              Join thousands of users who trust NoteEase to organize their thoughts and boost productivity.
+              Join thousands of users who trust NoteEase to organize their
+              thoughts and boost productivity.
             </p>
           </div>
 

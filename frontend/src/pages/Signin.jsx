@@ -1,5 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Shield, CheckCircle, AlertCircle, Loader2, BookOpen } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Shield,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  BookOpen,
+} from "lucide-react";
 import { useState } from "react";
 import API from "../services/api";
 import { GoogleLogin } from "@react-oauth/google";
@@ -85,21 +94,23 @@ const Signin = () => {
         {/* Background Elements */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-full blur-xl"></div>
         <div className="absolute bottom-20 right-10 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-emerald-500/10 rounded-full blur-xl"></div>
-        
+
         {/* Logo */}
-        <div className="lg:absolute top-8 left-8 flex items-center gap-3 mb-8 lg:mb-0 justify-center lg:justify-start">
-          <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-              <BookOpen className="w-5 h-5 text-white" />
+        <a href="/">
+          <div className="lg:absolute top-8 left-8 flex items-center gap-3 mb-8 lg:mb-0 justify-center lg:justify-start">
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
             </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                NoteEase
+              </h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              NoteEase
-            </h1>
-          </div>
-        </div>
+        </a>
 
         {/* Main Content */}
         <div className="relative z-10 max-w-md mx-auto lg:mx-0 w-full">
@@ -108,7 +119,8 @@ const Signin = () => {
               Welcome Back
             </h2>
             <p className="text-slate-600 text-lg leading-relaxed">
-              Sign in to access your notes and continue your productivity journey.
+              Sign in to access your notes and continue your productivity
+              journey.
             </p>
           </div>
 
@@ -175,9 +187,12 @@ const Signin = () => {
                   <div className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-emerald-800 font-medium">OTP sent successfully!</p>
+                      <p className="text-emerald-800 font-medium">
+                        OTP sent successfully!
+                      </p>
                       <p className="text-emerald-600 text-sm mt-1">
-                        Check your email for the 6-digit verification code. It expires in 10 minutes.
+                        Check your email for the 6-digit verification code. It
+                        expires in 10 minutes.
                       </p>
                     </div>
                   </div>
@@ -246,7 +261,9 @@ const Signin = () => {
             <div className="transform hover:scale-105 transition-transform duration-200">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
-                onError={() => setOtpError("Google login failed. Please try again.")}
+                onError={() =>
+                  setOtpError("Google login failed. Please try again.")
+                }
                 theme="outline"
                 size="large"
                 width="100%"
@@ -258,8 +275,8 @@ const Signin = () => {
           <div className="mt-8 text-center">
             <p className="text-slate-600">
               Don't have an account?{" "}
-              <Link 
-                to="/signup" 
+              <Link
+                to="/signup"
                 className="font-semibold text-purple-600 hover:text-purple-700 transition-colors hover:underline"
               >
                 Create one
@@ -278,7 +295,7 @@ const Signin = () => {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-emerald-500/20"></div>
-          
+
           {/* Floating Elements */}
           <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl max-w-sm">
             <div className="flex items-center gap-3 mb-3">
@@ -288,7 +305,8 @@ const Signin = () => {
               <h3 className="font-semibold text-slate-800">Smart Notes</h3>
             </div>
             <p className="text-slate-600 text-sm leading-relaxed">
-              Organize your thoughts, boost productivity, and never lose an important idea again.
+              Organize your thoughts, boost productivity, and never lose an
+              important idea again.
             </p>
           </div>
 

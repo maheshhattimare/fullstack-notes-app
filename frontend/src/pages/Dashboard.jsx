@@ -13,11 +13,14 @@ import {
   X,
   Save,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import API from "../services/api";
 import { jwtDecode } from "jwt-decode";
 import Loading from "../components/Loading";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import RichTextEditor from "../components/RichTextEditor";
 
 const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -25,7 +28,11 @@ const Dashboard = () => {
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [noteForm, setNoteForm] = useState({ title: "", content: "" });
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(null);
+  const [viewLoading, setViewLoading] = useState(null);
+  const [editLoading, setEditLoading] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [editNoteId, setEditNoteId] = useState(null);
   const [viewNote, setViewNote] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,13 +71,10 @@ const Dashboard = () => {
 
   const fetchNoteById = async (id) => {
     try {
-      setActionLoading(id);
       const res = await API.get(`/notes/${id}`);
       return res.data.note;
     } catch (err) {
       console.error("Failed to fetch note by id", err);
-    } finally {
-      setActionLoading(null);
     }
   };
 
@@ -94,20 +98,29 @@ const Dashboard = () => {
       fetchNotes();
     } else {
       setLoading(false);
-      navigate("/login");
+      navigate("/signin");
     }
   }, []);
 
   const handleDelete = async (id) => {
+    setDeleteConfirm(null);
     try {
-      setActionLoading(id);
+      setDeleteLoading(id);
       await API.delete(`/notes/${id}`);
       setNotes(notes.filter((n) => n._id !== id));
     } catch (err) {
       console.error("Failed to delete note", err);
     } finally {
-      setActionLoading(null);
+      setDeleteLoading(null);
     }
+  };
+
+  const confirmDelete = (note) => {
+    setDeleteConfirm(note);
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirm(null);
   };
 
   const validateForm = () => {
@@ -115,7 +128,9 @@ const Dashboard = () => {
     if (!noteForm.title.trim()) {
       errors.title = "Title is required";
     }
-    if (!noteForm.content.trim()) {
+    // For rich text, check if content is empty (only HTML tags without text)
+    const textContent = noteForm.content.replace(/<[^>]*>/g, "").trim();
+    if (!textContent) {
       errors.content = "Content is required";
     }
     setFormErrors(errors);
@@ -127,7 +142,7 @@ const Dashboard = () => {
     if (!validateForm()) return;
 
     try {
-      setActionLoading("submit");
+      setSubmitLoading(true);
       if (editNoteId) {
         await API.put(`/notes/${editNoteId}`, {
           title: noteForm.title.trim(),
@@ -148,12 +163,14 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to submit note", err);
     } finally {
-      setActionLoading(null);
+      setSubmitLoading(false);
     }
   };
 
   const openEditModal = async (id) => {
+    setEditLoading(id);
     const note = await fetchNoteById(id);
+    setEditLoading(null);
     if (note) {
       setNoteForm({ title: note.title, content: note.content });
       setEditNoteId(id);
@@ -162,7 +179,9 @@ const Dashboard = () => {
   };
 
   const openViewModal = async (id) => {
+    setViewLoading(id);
     const note = await fetchNoteById(id);
+    setViewLoading(null);
     if (note) {
       setViewNote(note);
     }
@@ -235,7 +254,16 @@ const Dashboard = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-white rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all duration-200"
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors absolute right-3 top-[7px]"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            )}
           </div>
+
           <button
             onClick={() => {
               setNoteForm({ title: "", content: "" });
@@ -296,11 +324,11 @@ const Dashboard = () => {
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openViewModal(note._id)}
-                          disabled={actionLoading === note._id}
+                          disabled={viewLoading === note._id}
                           className="p-2 hover:bg-blue-50 rounded-lg transition-colors text-blue-500 hover:text-blue-600"
                           title="View Note"
                         >
-                          {actionLoading === note._id ? (
+                          {viewLoading === note._id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
                             <Eye className="w-4 h-4" />
@@ -308,24 +336,33 @@ const Dashboard = () => {
                         </button>
                         <button
                           onClick={() => openEditModal(note._id)}
-                          disabled={actionLoading === note._id}
+                          disabled={editLoading === note._id}
                           className="p-2 hover:bg-emerald-50 rounded-lg transition-colors text-emerald-500 hover:text-emerald-600"
                           title="Edit Note"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          {editLoading === note._id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Edit2 className="w-4 h-4" />
+                          )}
                         </button>
                         <button
-                          onClick={() => handleDelete(note._id)}
-                          disabled={actionLoading === note._id}
+                          onClick={() => confirmDelete(note)}
+                          disabled={deleteLoading === note._id}
                           className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-500 hover:text-red-600"
                           title="Delete Note"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          {deleteLoading === note._id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </div>
                     <p className="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-4">
-                      {note.content}
+                      {note.content.replace(/<[^>]*>/g, "").substring(0, 150)}
+                      ...
                     </p>
                     <div className="flex items-center justify-between text-xs text-slate-500">
                       <span>{formatDate(note.createdAt)}</span>
@@ -337,6 +374,69 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 animate-in slide-in-from-bottom-4">
+              <div className="p-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800">
+                      Delete Note
+                    </h3>
+                    <p className="text-slate-600 text-sm">
+                      This action cannot be undone
+                    </p>
+                  </div>
+                </div>
+
+                {/* <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                  <h4 className="font-semibold text-slate-800 mb-2 line-clamp-1">
+                    "{deleteConfirm.title}"
+                  </h4>
+                  <p className="text-slate-600 text-sm line-clamp-2">
+                    {deleteConfirm.content}
+                  </p>
+                </div> */}
+
+                <p className="text-slate-600 mb-6">
+                  Are you sure you want to delete this note? This action cannot
+                  be undone and the note will be permanently removed.
+                </p>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={cancelDelete}
+                    className="px-6 py-3 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl font-medium transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleDelete(deleteConfirm._id)}
+                    disabled={deleteLoading === deleteConfirm._id}
+                    className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {deleteLoading === deleteConfirm._id ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-5 h-5" />
+                        <span>Delete Note</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Create/Edit Modal */}
         {showModal && (
@@ -374,7 +474,8 @@ const Dashboard = () => {
                       placeholder="Enter note title..."
                     />
                     {formErrors.title && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
                         {formErrors.title}
                       </p>
                     )}
@@ -384,21 +485,18 @@ const Dashboard = () => {
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       Content
                     </label>
-                    <textarea
+                    <RichTextEditor
                       value={noteForm.content}
-                      onChange={(e) =>
-                        setNoteForm({ ...noteForm, content: e.target.value })
+                      onChange={(content) =>
+                        setNoteForm({ ...noteForm, content })
                       }
-                      rows={8}
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        formErrors.content
-                          ? "border-red-500"
-                          : "border-slate-200"
-                      } focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all duration-200 resize-none`}
                       placeholder="Write your note content here..."
+                      error={formErrors.content}
                     />
                     {formErrors.content && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertCircle className="w-4 h-4" />
                         {formErrors.content}
                       </p>
                     )}
@@ -415,10 +513,10 @@ const Dashboard = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={actionLoading === "submit"}
+                    disabled={submitLoading}
                     className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    {actionLoading === "submit" ? (
+                    {submitLoading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
                         <span>Saving...</span>
@@ -461,15 +559,17 @@ const Dashboard = () => {
 
               <div className="p-6">
                 <div className="prose max-w-none">
-                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                    {viewNote.content}
-                  </p>
+                  <div
+                    className="text-slate-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: viewNote.content }}
+                  />
                 </div>
               </div>
             </div>
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };
