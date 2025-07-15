@@ -361,7 +361,10 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <p className="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-4">
-                      {note.content.replace(/<[^>]*>/g, "").substring(0, 150)}
+                      {note.content
+                        .replace(/<[^>]*>/g, "")
+                        .replace(/&nbsp;/g, " ")
+                        .substring(0, 150)}
                       ...
                     </p>
                     <div className="flex items-center justify-between text-xs text-slate-500">
@@ -394,14 +397,15 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                <div className="bg-slate-50 rounded-xl p-4 mb-6">
                   <h4 className="font-semibold text-slate-800 mb-2 line-clamp-1">
                     "{deleteConfirm.title}"
                   </h4>
-                  <p className="text-slate-600 text-sm line-clamp-2">
-                    {deleteConfirm.content}
-                  </p>
-                </div> */}
+                  <div
+                    className="text-slate-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: viewNote.content }}
+                  />
+                </div>
 
                 <p className="text-slate-600 mb-6">
                   Are you sure you want to delete this note? This action cannot
