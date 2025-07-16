@@ -139,7 +139,7 @@ const Signup = () => {
   // google login loader
   if (googleLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen w-screen flex items-center justify-center bg-white">
         <Loading />
       </div>
     );
