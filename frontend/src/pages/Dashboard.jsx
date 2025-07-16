@@ -28,7 +28,6 @@ const Dashboard = () => {
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [noteForm, setNoteForm] = useState({ title: "", content: "" });
   const [loading, setLoading] = useState(true);
-  const [viewLoading, setViewLoading] = useState(null);
   const [editLoading, setEditLoading] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -179,9 +178,7 @@ const Dashboard = () => {
   };
 
   const openViewModal = async (id) => {
-    setViewLoading(id);
     const note = await fetchNoteById(id);
-    setViewLoading(null);
     if (note) {
       setViewNote(note);
     }
@@ -314,6 +311,7 @@ const Dashboard = () => {
               {filteredNotes.map((note) => (
                 <div
                   key={note._id}
+                  onClick={() => openViewModal(note._id)}
                   className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group overflow-hidden"
                 >
                   <div className="p-6">
@@ -323,19 +321,10 @@ const Dashboard = () => {
                       </h3>
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
-                          onClick={() => openViewModal(note._id)}
-                          disabled={viewLoading === note._id}
-                          className="p-2 hover:bg-blue-50 rounded-lg transition-colors text-blue-500 hover:text-blue-600"
-                          title="View Note"
-                        >
-                          {viewLoading === note._id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                        <button
-                          onClick={() => openEditModal(note._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(note._id);
+                          }}
                           disabled={editLoading === note._id}
                           className="p-2 hover:bg-emerald-50 rounded-lg transition-colors text-emerald-500 hover:text-emerald-600"
                           title="Edit Note"
@@ -347,7 +336,10 @@ const Dashboard = () => {
                           )}
                         </button>
                         <button
-                          onClick={() => confirmDelete(note)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmDelete(note);
+                          }}
                           disabled={deleteLoading === note._id}
                           className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-500 hover:text-red-600"
                           title="Delete Note"
@@ -396,21 +388,6 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-
-                {/* <div className="bg-slate-50 rounded-xl p-4 mb-6">
-                  <h4 className="font-semibold text-slate-800 mb-2 line-clamp-1">
-                    "{deleteConfirm.title}"
-                  </h4>
-                  {deleteConfirm?.content && (
-                    <div
-                      className="text-slate-700 leading-relaxed"
-                      dangerouslySetInnerHTML={{
-                        __html: deleteConfirm.content,
-                      }}
-                    />
-                  )}
-                </div> */}
-
                 <p className="text-slate-600 mb-6">
                   Are you sure you want to delete this note? This action cannot
                   be undone and the note will be permanently removed.
