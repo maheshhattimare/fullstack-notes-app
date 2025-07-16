@@ -215,15 +215,18 @@ const RichTextEditor = ({ value, onChange, placeholder, error }) => {
           font-style: italic;
         }
 
-        [contenteditable] ul,
+        [contenteditable] ul {
+          padding-left: 24px;
+          margin: 12px 0;
+          list-style-type: disc;
+        }
+
         [contenteditable] ol {
           padding-left: 24px;
           margin: 12px 0;
+          list-style-type: decimal;
         }
 
-        [contenteditable] li {
-          margin: 4px 0;
-        }
 
         [contenteditable] a {
           color: #8b5cf6;

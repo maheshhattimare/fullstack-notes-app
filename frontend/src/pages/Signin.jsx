@@ -93,6 +93,15 @@ const Signin = () => {
     }
   };
 
+  // google login loader
+  if (googleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex flex-col lg:flex-row">
       {/* Left Section */}
@@ -265,19 +274,15 @@ const Signin = () => {
           {/* Google Login */}
           <div className="flex justify-center">
             <div className="transform hover:scale-105 transition-transform duration-200">
-              {googleLoading ? (
-                <Loading />
-              ) : (
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() =>
-                    setOtpError("Google login failed. Please try again.")
-                  }
-                  theme="outline"
-                  size="large"
-                  width="100%"
-                />
-              )}
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() =>
+                  setOtpError("Google login failed. Please try again.")
+                }
+                theme="outline"
+                size="large"
+                width="100%"
+              />
             </div>
           </div>
 
