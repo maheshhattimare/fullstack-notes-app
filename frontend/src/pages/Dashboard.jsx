@@ -28,6 +28,7 @@ const Dashboard = () => {
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [noteForm, setNoteForm] = useState({ title: "", content: "" });
   const [loading, setLoading] = useState(true);
+  const [viewLoading, setViewLoading] = useState(null); // noteId being viewed
   const [editLoading, setEditLoading] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -178,10 +179,10 @@ const Dashboard = () => {
   };
 
   const openViewModal = async (id) => {
+    setViewLoading(id); // Start loading
     const note = await fetchNoteById(id);
-    if (note) {
-      setViewNote(note);
-    }
+    setViewLoading(null); // Stop loading
+    if (note) setViewNote(note);
   };
 
   const closeViewModal = () => {
@@ -353,11 +354,17 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <p className="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-4">
-                      {note.content
-                        .replace(/<[^>]*>/g, "")
-                        .replace(/&nbsp;/g, " ")
-                        .substring(0, 150)}
-                      ...
+                      {viewLoading === note._id ? (
+                        <span className="flex items-center gap-2 text-purple-500 animate-pulse">
+                          <Loader2 className="w-4 h-4 animate-spin text-purple-50-500" />
+                          Loading...
+                        </span>
+                      ) : (
+                        note.content
+                          .replace(/<[^>]*>/g, "")
+                          .replace(/&nbsp;/g, " ")
+                          .substring(0, 150)
+                      )}
                     </p>
                     <div className="flex items-center justify-between text-xs text-slate-500">
                       <span>{formatDate(note.createdAt)}</span>
