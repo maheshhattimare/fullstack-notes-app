@@ -2,7 +2,7 @@ import { BookOpen, Loader2 } from "lucide-react";
 
 const Loading = () => {
   return (
-    <div className="min-h-screen w-[100vw] bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
       <div className="text-center">
         {/* Animated Logo */}
         <div className="relative mb-8">
