@@ -6,7 +6,7 @@ import {
   List,
   ListOrdered,
   Link,
-  Quote,
+  Code,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -23,12 +23,6 @@ const RichTextEditor = ({ value, onChange, placeholder, error }) => {
     }
   }, [value]);
 
-  const executeCommand = (command, value = null) => {
-    document.execCommand(command, false, value);
-    editorRef.current.focus();
-    handleContentChange();
-  };
-
   const handleContentChange = () => {
     if (editorRef.current) {
       const content = editorRef.current.innerHTML;
@@ -36,94 +30,143 @@ const RichTextEditor = ({ value, onChange, placeholder, error }) => {
     }
   };
 
+  const executeCommand = (command) => {
+    document.execCommand(command, false, null);
+    editorRef.current.focus();
+    handleContentChange();
+  };
+
   const insertLink = () => {
     const url = prompt("Enter URL:");
     if (url) {
-      executeCommand("createLink", url);
+      document.execCommand("createLink", false, url);
+      handleContentChange();
     }
   };
 
-  const formatBlock = (tag) => {
-    executeCommand("formatBlock", tag);
+  const insertCodeBlock = () => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const codeContainer = document.createElement("div");
+    codeContainer.style.margin = "16px 0";
+
+    const codeBlock = document.createElement("pre");
+    codeBlock.style.background = "#f1f5f9";
+    codeBlock.style.border = "1px solid #e2e8f0";
+    codeBlock.style.padding = "12px";
+    codeBlock.style.borderRadius = "8px";
+    codeBlock.style.fontSize = "14px";
+    codeBlock.style.fontFamily = "monospace";
+    codeBlock.style.overflowX = "auto";
+    codeBlock.style.whiteSpace = "pre-wrap";
+    codeBlock.contentEditable = "true";
+    codeBlock.textContent = "// Type your code here...";
+
+    const exitButton = document.createElement("button");
+    exitButton.innerHTML = "Exit Code Block";
+    exitButton.style.background = "#6366f1";
+    exitButton.style.color = "white";
+    exitButton.style.border = "none";
+    exitButton.style.padding = "4px 8px";
+    exitButton.style.borderRadius = "4px";
+    exitButton.style.fontSize = "12px";
+    exitButton.style.cursor = "pointer";
+    exitButton.style.marginTop = "8px";
+    exitButton.style.display = "block";
+
+    exitButton.onclick = (e) => {
+      e.preventDefault();
+      const newParagraph = document.createElement("p");
+      newParagraph.innerHTML = "<br>";
+      codeContainer.parentNode.insertBefore(newParagraph, codeContainer.nextSibling);
+
+      const newRange = document.createRange();
+      newRange.setStart(newParagraph, 0);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      editorRef.current.focus();
+      handleContentChange();
+    };
+
+    codeContainer.appendChild(codeBlock);
+    codeContainer.appendChild(exitButton);
+    range.deleteContents();
+    range.insertNode(codeContainer);
+
+    const codeRange = document.createRange();
+    codeRange.selectNodeContents(codeBlock);
+    selection.removeAllRanges();
+    selection.addRange(codeRange);
+
+    editorRef.current.focus();
+    handleContentChange();
+  };
+
+  const adjustFontSize = (type) => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const selectedNode = selection.focusNode?.parentNode;
+
+    const computedStyle = window.getComputedStyle(selectedNode);
+    const currentSize = parseFloat(computedStyle.fontSize) || 14;
+
+    const newSize = type === "increase"
+      ? Math.min(currentSize + 2, 36)
+      : Math.max(currentSize - 2, 10);
+
+    if (!range.collapsed) {
+      const contents = range.extractContents();
+      const span = document.createElement("span");
+      span.style.fontSize = `${newSize}px`;
+      span.appendChild(contents);
+      range.insertNode(span);
+
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    } else {
+      if (selectedNode && selectedNode !== editorRef.current) {
+        selectedNode.style.fontSize = `${newSize}px`;
+      }
+    }
+
+    editorRef.current.focus();
+    handleContentChange();
   };
 
   const toolbarButtons = [
+    { icon: Bold, command: () => executeCommand("bold"), title: "Bold" },
+    { icon: Italic, command: () => executeCommand("italic"), title: "Italic" },
+    { icon: Underline, command: () => executeCommand("underline"), title: "Underline" },
+    { icon: List, command: () => executeCommand("insertUnorderedList"), title: "Bullet List" },
+    { icon: ListOrdered, command: () => executeCommand("insertOrderedList"), title: "Numbered List" },
+    { icon: Link, command: insertLink, title: "Insert Link" },
+    { icon: Code, command: insertCodeBlock, title: "Insert Code Block" },
+    { icon: AlignLeft, command: () => executeCommand("justifyLeft"), title: "Align Left" },
+    { icon: AlignCenter, command: () => executeCommand("justifyCenter"), title: "Align Center" },
+    { icon: AlignRight, command: () => executeCommand("justifyRight"), title: "Align Right" },
+    { icon: Undo, command: () => executeCommand("undo"), title: "Undo" },
+    { icon: Redo, command: () => executeCommand("redo"), title: "Redo" },
     {
-      icon: Bold,
-      command: "bold",
-      title: "Bold (Ctrl+B)",
-      shortcut: "Ctrl+B",
+      icon: () => <span className="font-bold text-sm">A+</span>,
+      command: () => adjustFontSize("increase"),
+      title: "Increase Font Size",
     },
     {
-      icon: Italic,
-      command: "italic",
-      title: "Italic (Ctrl+I)",
-      shortcut: "Ctrl+I",
-    },
-    {
-      icon: Underline,
-      command: "underline",
-      title: "Underline (Ctrl+U)",
-      shortcut: "Ctrl+U",
-    },
-    {
-      icon: List,
-      command: "insertUnorderedList",
-      title: "Bullet List",
-      shortcut: null,
-    },
-    {
-      icon: ListOrdered,
-      command: "insertOrderedList",
-      title: "Numbered List",
-      shortcut: null,
-    },
-    {
-      icon: Link,
-      command: insertLink,
-      title: "Insert Link",
-      shortcut: null,
-    },
-    {
-      icon: Quote,
-      command: () => formatBlock("blockquote"),
-      title: "Quote",
-      shortcut: null,
-    },
-    {
-      icon: AlignLeft,
-      command: "justifyLeft",
-      title: "Align Left",
-      shortcut: null,
-    },
-    {
-      icon: AlignCenter,
-      command: "justifyCenter",
-      title: "Align Center",
-      shortcut: null,
-    },
-    {
-      icon: AlignRight,
-      command: "justifyRight",
-      title: "Align Right",
-      shortcut: null,
-    },
-    {
-      icon: Undo,
-      command: "undo",
-      title: "Undo (Ctrl+Z)",
-      shortcut: "Ctrl+Z",
-    },
-    {
-      icon: Redo,
-      command: "redo",
-      title: "Redo (Ctrl+Y)",
-      shortcut: "Ctrl+Y",
+      icon: () => <span className="font-bold text-sm">A-</span>,
+      command: () => adjustFontSize("decrease"),
+      title: "Decrease Font Size",
     },
   ];
 
   const handleKeyDown = (e) => {
-    // Handle keyboard shortcuts
     if (e.ctrlKey || e.metaKey) {
       switch (e.key) {
         case "b":
@@ -153,28 +196,21 @@ const RichTextEditor = ({ value, onChange, placeholder, error }) => {
   };
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all duration-200">
-      {/* Toolbar */}
-      <div className="bg-slate-50 border-b border-slate-200 p-3">
+    <div className={`border rounded-xl overflow-hidden focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all duration-200 ${
+      error ? "border-red-500" : "border-slate-200"
+    }`}>
+      <div className="bg-slate-50 border-b border-slate-200 p-3 sticky top-0 z-30 shadow-sm">
         <div className="flex flex-wrap gap-1">
           {toolbarButtons.map((button, index) => (
             <button
               key={index}
               type="button"
-              onClick={() => {
-                if (typeof button.command === "function") {
-                  button.command();
-                } else {
-                  executeCommand(button.command);
-                }
-              }}
+              onClick={button.command}
               className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all duration-200 text-slate-600 hover:text-purple-600 group relative"
               title={button.title}
             >
               <button.icon className="w-4 h-4" />
-
-              {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-40">
                 {button.title}
               </div>
             </button>
@@ -182,67 +218,51 @@ const RichTextEditor = ({ value, onChange, placeholder, error }) => {
         </div>
       </div>
 
-      {/* Editor */}
       <div
         ref={editorRef}
         contentEditable
         onInput={handleContentChange}
         onKeyDown={handleKeyDown}
-        className={`min-h-[200px] p-4 outline-none prose prose-sm max-w-none ${
-          error ? "border-red-500" : ""
-        }`}
-        style={{
-          lineHeight: "1.6",
-          fontSize: "14px",
-        }}
+        className="min-h-[200px] max-h-[400px] overflow-y-auto p-4 outline-none prose prose-sm max-w-none"
+        style={{ lineHeight: "1.6", fontSize: "14px" }}
         data-placeholder={placeholder}
         suppressContentEditableWarning={true}
       />
 
-      {/* Placeholder styling */}
       <style>{`
         [contenteditable]:empty:before {
           content: attr(data-placeholder);
           color: #94a3b8;
           pointer-events: none;
         }
-
-        [contenteditable] blockquote {
-          border-left: 4px solid #8b5cf6;
-          padding-left: 16px;
-          margin: 16px 0;
-          color: #64748b;
-          font-style: italic;
-        }
-
         [contenteditable] ul {
           padding-left: 24px;
           margin: 12px 0;
           list-style-type: disc;
         }
-
         [contenteditable] ol {
           padding-left: 24px;
           margin: 12px 0;
           list-style-type: decimal;
         }
-
-
+        [contenteditable] li {
+          margin: 4px 0;
+        }
         [contenteditable] a {
           color: #8b5cf6;
           text-decoration: underline;
         }
-
         [contenteditable] a:hover {
           color: #7c3aed;
         }
-
         [contenteditable] p {
           margin: 8px 0;
         }
-
         [contenteditable]:focus {
           outline: none;
+        }
+        [contenteditable] pre {
+          position: relative;
         }
       `}</style>
     </div>

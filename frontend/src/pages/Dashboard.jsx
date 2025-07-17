@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Search,
   Plus,
-  Eye,
   Edit2,
   Trash2,
   BookOpen,
@@ -222,10 +221,10 @@ const Dashboard = () => {
                 <User className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-800">
+                <h1 className="text-2xl md:text-3xl  font-bold text-slate-800 text-wrap">
                   Welcome back, {user?.fullName || "User"}!
                 </h1>
-                <p className="text-slate-600 mt-1">{user?.email}</p>
+                <p className="text-slate-600 mt-1 text-wrap">{user?.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-500">
@@ -487,7 +486,6 @@ const Dashboard = () => {
                     />
                     {formErrors.content && (
                       <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
                         <AlertCircle className="w-4 h-4" />
                         {formErrors.content}
                       </p>
