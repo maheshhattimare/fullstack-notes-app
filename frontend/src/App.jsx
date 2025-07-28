@@ -15,9 +15,9 @@ function App() {
         <Route
           path="/"
           element={
-            <PublicRoute>
-              <LandingPage />
-            </PublicRoute>
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
           }
         />
         <Route
@@ -36,14 +36,14 @@ function App() {
             </PublicRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/dashboard"
           element={
             <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
           }
-        />
+        /> */}
         <Route path="*" element={<Navigate to="/signup" />} />
       </Routes>
     </GoogleOAuthProvider>

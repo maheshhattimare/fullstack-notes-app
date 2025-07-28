@@ -10,4 +10,21 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle expired/invalid tokens globally
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+
+    // If token is expired or invalid, logout user
+    if (status === 401 || status === 403) {
+      alert("Session expired. Please log in again.");
+      localStorage.removeItem("token");
+      window.location.href = "/signin"; // force logout
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default API;

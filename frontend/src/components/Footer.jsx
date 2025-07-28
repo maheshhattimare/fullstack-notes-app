@@ -37,11 +37,11 @@ const Footer = ({
   return (
     <footer
       className={`
-        ${getPositionClasses()}
-        ${getThemeClasses()}
-        backdrop-blur-md border-t transition-all duration-300
-        ${className}
-      `}
+    ${getPositionClasses()}
+    ${getThemeClasses()}
+    backdrop-blur-md border-t border-slate-200 dark:border-slate-700 transition-all duration-300 bg-white/80 dark:bg-slate-900/80
+    ${className}
+  `}
     >
       <div className="max-w-7xl mx-auto px-4 py-4">
         <motion.div
@@ -51,7 +51,7 @@ const Footer = ({
           transition={{ duration: 0.5 }}
         >
           {/* Main Content */}
-          <div className="flex items-center space-x-2 text-sm">
+          <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-400">
             <span>© {currentYear} Made with</span>
             <motion.div
               animate={{
@@ -63,7 +63,7 @@ const Footer = ({
                 ease: "easeInOut",
               }}
             >
-              <Heart className="w-4 h-4 text-red-500 fill-current" />
+              <Heart className="w-4 h-4 text-red-500 dark:text-red-400 fill-current" />
             </motion.div>
             <span>by</span>
             <motion.a
@@ -80,7 +80,7 @@ const Footer = ({
           </div>
 
           {/* Optional: All Rights Reserved (only on larger screens) */}
-          <div className="hidden sm:block text-xs text-gray-500 dark:text-gray-500">
+          <div className="hidden sm:block text-xs text-slate-500 dark:text-slate-400">
             All Rights Reserved.
           </div>
         </motion.div>

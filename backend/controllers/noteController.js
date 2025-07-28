@@ -56,7 +56,9 @@ export const getNoteById = async (req, res) => {
     const note = await Note.findOne({ _id: id, userId: req.user.id });
 
     if (!note) {
-      return res.status(404).json({ success: false, message: "Note not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Note not found" });
     }
 
     return res.status(200).json({ success: true, note });
@@ -83,10 +85,14 @@ export const updateNote = async (req, res) => {
     );
 
     if (!note) {
-      return res.status(404).json({ success: false, message: "Note not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Note not found" });
     }
 
-    return res.status(200).json({ success: true, message: "Note updated", note });
+    return res
+      .status(200)
+      .json({ success: true, message: "Note updated", note });
   } catch (error) {
     console.error("Update note error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -114,5 +120,47 @@ export const deleteNote = async (req, res) => {
   } catch (error) {
     console.error("Delete note error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// pin note controller
+export const toggleNotePinStatus = async (req, res) => {
+  const { id } = req.params;
+
+  // Check for valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid note ID" });
+  }
+
+  try {
+    const note = await Note.findById(id);
+
+    if (!note) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Note not found" });
+    }
+
+    // Ensure the note belongs to the user making the request
+    if (note.userId.toString() !== req.user.id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    // Toggle the pin status
+    note.isPinned = !note.isPinned;
+    const updatedNote = await note.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Note pin status updated",
+      note: updatedNote,
+    });
+  } catch (error) {
+    console.error("Toggle pin status error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };

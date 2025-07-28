@@ -6,6 +6,7 @@ import {
   getNotes,
   getNoteById,
   updateNote,
+  toggleNotePinStatus,
 } from "../controllers/noteController.js";
 
 const router = express.Router();
@@ -13,9 +14,10 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get("/", getNotes);
-router.get("/:id", getNoteById); // ✅ View single note
+router.get("/:id", getNoteById);
 router.post("/", createNote);
-router.put("/:id", updateNote); // ✅ Update note
+router.put("/:id", updateNote);
 router.delete("/:id", deleteNote);
+router.patch("/:id/pin", toggleNotePinStatus);
 
 export default router;
